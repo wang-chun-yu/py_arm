@@ -1,0 +1,18 @@
+services:
+  amd64_runtime:
+    container_name: qilin_amd64_runtime
+    image: ybx.ubtrobot.com/runtime/qilin/system:qilin-ros2-humble-rk3588-v1.0.0
+    platform: linux/amd64
+    tty: true
+    privileged: true
+    network_mode: host
+    environment:
+      DISPLAY: ${DISPLAY:-:1}
+    volumes:
+      - /etc/timezone:/etc/timezone:rw
+      - /etc/localtime:/etc/localtime:rw
+      - ~/.ssh:/root/.ssh:rw
+      - ./build_x86.sh:/home/ubt/build_x86.sh:rw
+      - ../../src:/home/ubt/qilin:rw
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /dev:/dev
