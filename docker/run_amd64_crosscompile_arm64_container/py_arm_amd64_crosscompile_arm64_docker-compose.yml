@@ -1,8 +1,8 @@
 ---
 services:
   arm64_sysroot:
-    container_name: qilin_arm64_sysroot
-    image: ybx.ubtrobot.com/runtime/qilin/system:qilin-ros2-humble-rk3588-v1.0.0
+    container_name: py_arm_arm64_sysroot
+    image: localhost:5000/runtime/py_arm/system:py_arm-ros2-humble-v1.0.0
     platform: linux/arm64
     volumes:
       - arm64_lib:/lib   # 直接挂载容器的/lib到卷
@@ -11,8 +11,8 @@ services:
       - arm64_opt:/opt   # 直接挂载容器的/opt到卷
 
   amd64_crosscompile_arm64: 
-    container_name: qilin_amd64_crosscompile_arm64
-    image: ybx.ubtrobot.com/ubuntu:22.04-crosscompile
+    container_name: py_arm_amd64_crosscompile_arm64
+    image: localhost:5000/${AMD64_CROSSCOMPILE_IMAGE:-amd64-crosscompile:v1.0.0}
     platform: linux/amd64
     network_mode: host # 配置网络模式为主机模式
     tty: true
@@ -24,9 +24,9 @@ services:
       - /etc/timezone:/etc/timezone:rw
       - /etc/localtime:/etc/localtime:rw
       - ~/.ssh:/root/.ssh:rw
-      - ./build.sh:/home/ubt/build.sh:rw
-      - ./toolchain.cmake:/home/ubt/toolchain.cmake:r
-      - ../../src:/home/ubt/qilin/src:rw
+      - ./build.sh:/home/chunyu/build.sh:rw
+      - ./toolchain.cmake:/home/chunyu/toolchain.cmake:r
+      - ../../src:/home/chunyu/py_arm/src:rw
     depends_on:
       - arm64_sysroot
         

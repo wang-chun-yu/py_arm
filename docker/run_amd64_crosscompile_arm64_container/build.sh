@@ -23,7 +23,7 @@ export PKG_CONFIG_PATH="${SYSROOT}/usr/lib/pkgconfig:${SYSROOT}/usr/share/pkgcon
 export PKG_CONFIG_SYSROOT_DIR=$SYSROOT
 
 export ROS2_IMAGE=${SYSROOT}/opt/ros/humble
-export INSTALL_PATH=/home/ubt/install
+export INSTALL_PATH=/home/chunyu/install
 
 [ -e "$ROS2_IMAGE/local_setup.bash" ] && source $ROS2_IMAGE/local_setup.bash
 
@@ -87,7 +87,7 @@ colcon build \
 
 # 编译成功后，生成git信息文件
 GIT_INFO_FILE="${INSTALL_PATH}/git_info"
-SYSTEM_DIR="${HOME}/qilin/src/system"
+SYSTEM_DIR="${HOME}/py_arm/src/system"
 
 echo "正在收集 Git 仓库信息..."
 

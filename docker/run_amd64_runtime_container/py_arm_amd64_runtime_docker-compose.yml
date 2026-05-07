@@ -1,7 +1,7 @@
 services:
   amd64_runtime:
-    container_name: qilin_amd64_runtime
-    image: ybx.ubtrobot.com/runtime/qilin/system:qilin-ros2-humble-rk3588-v1.0.0
+    container_name: py_arm_amd64_runtime
+    image: localhost:5000/runtime/py_arm/system:py_arm-ros2-humble-v1.0.0
     platform: linux/amd64
     tty: true
     privileged: true
@@ -12,7 +12,7 @@ services:
       - /etc/timezone:/etc/timezone:rw
       - /etc/localtime:/etc/localtime:rw
       - ~/.ssh:/root/.ssh:rw
-      - ./build_x86.sh:/home/ubt/build_x86.sh:rw
-      - ../../src:/home/ubt/qilin:rw
+      - ./build_x86.sh:/home/chunyu/build_x86.sh:rw
+      - ../../src:/home/chunyu/py_arm:rw
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /dev:/dev

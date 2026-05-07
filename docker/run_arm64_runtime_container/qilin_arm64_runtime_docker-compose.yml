@@ -1,7 +1,7 @@
 services:
   qilin_arm64_runtime : &default
     container_name: qilin_arm64_runtime
-    image: ybx.ubtrobot.com/runtime/qilin/system:qilin-ros2-humble-rk3588-v1.0.0
+    image: ybx.ubtrobot.com/runtime/py_arm/system:py_arm-ros2-humble-rk3588-v1.0.0
     network_mode: host
     tty: true
     restart: always
@@ -11,15 +11,15 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /dev:/dev:rw
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
-      - ~/dataset:/home/ubt/dataset:rw
+      - ~/dataset:/home/chunyu/dataset:rw
       - /tmp:/tmp:rw
       - /etc/asound.conf:/etc/asound.conf
       - /run/dbus:/run/dbus # for bluetooth
       - /var/run/dbus:/var/run/dbus:ro
       - /run/NetworkManager:/run/NetworkManager:ro
-      - ~/.config/ubx_docker:/home/ubt/version_info:rw
+      - ~/.config/ubx_docker:/home/chunyu/version_info:rw
       - /usr/local/lib/camera-drv:/usr/local/lib/camera-drv:rw
     devices:
       - /dev/bus/usb
       - /dev/snd
-    user: ubt
+    user: chunyu

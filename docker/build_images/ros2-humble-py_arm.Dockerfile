@@ -1,14 +1,8 @@
-# ROS 2 Humble on RK3588 (arm64) + Ubuntu 22.04 — Qilin / OpenArm 工作区
 #
-# 前提：基础镜像 ybx.ubtrobot.com/ubuntu:22.04-ros2 已内置 ROS 2 Humble，
-#       本文件不再添加 ros2 apt 源、不重复安装 ros-base。
-#
-# 构建（在含完整工作区的目录下，可将上下文设为仓库根）：
-#   docker build -f ros2-humble-rk3588-qilin.Dockerfile -t ros2-humble-rk3588-qilin:latest .
-#
-# 运行示例见文件末尾。
-
-FROM ybx.ubtrobot.com/ubuntu:22.04-ros2
+# buildx + docker-container 且 builder 使用宿主机网络时，FROM 建议用 127.0.0.1:5000，
+# 避免 localhost 解析到 [::1] 而本机 registry 仅监听 IPv4 时出现 connection refused。
+ARG LOCAL_REGISTRY=127.0.0.1:5000
+FROM ${LOCAL_REGISTRY}/ros:humble
 
 # 基础镜像若以非 root USER 结束，后续 sed/apt 会 Permission denied
 USER root
@@ -19,7 +13,7 @@ ENV ROS_DISTRO=humble
 
 # ============================================================
 # APT 镜像（22.04：sources.list 与 ubuntu.sources 并存）+ universe
-# 本层合并：基础工具 + OpenArm 全仓 colcon 常见系统依赖（缺省曾导致 CMake/pkg-config 失败）
+# 本层合并：基础工具 + py_arm 全仓 colcon 常见系统依赖（缺省曾导致 CMake/pkg-config 失败）
 #   pkg-config | libwebsockets-dev | portaudio19-dev（Jammy 勿用 libportaudio-dev 虚包名）| libsamplerate0-dev
 #   libgraphicsmagick++1-dev | graphicsmagick-libmagick-dev-compat
 #   libjsoncpp-dev | libmosquitto-dev | libmosquittopp-dev
@@ -161,28 +155,18 @@ RUN set -eux; \
 RUN grep -q "source /opt/ros/humble/setup.bash" /etc/bash.bashrc \
     || echo "source /opt/ros/humble/setup.bash" >> /etc/bash.bashrc
 
-WORKDIR /root
-CMD ["bash"]
-
 # ============================================================
-# 运行示例（RK3588 / Mali，勿使用 NVIDIA runtime）
-#
-# docker run -it --rm \
-#   --net=host \
-#   --ipc=host \
-#   --privileged \
-#   -v /dev:/dev \
-#   -v /path/to/OpenArm:/root/ros2_ws/src:rw \
-#   -v /tmp/.X11-unix:/tmp/.X11-unix \
-#   -e DISPLAY=${DISPLAY} \
-#   ros2-humble-rk3588-qilin:latest
-#
-# 仅使用 Panfrost 时可加：--device /dev/dri
-#
-# 宿主机（Ubuntu 22.04）对齐本镜像首层系统依赖时可执行（需已启用 universe）：
-# sudo apt update && sudo apt install -y \
-#   pkg-config build-essential cmake git libwebsockets-dev portaudio19-dev libsamplerate0-dev \
-#   libgraphicsmagick++1-dev graphicsmagick-libmagick-dev-compat libjsoncpp-dev \
-#   libmosquitto-dev libmosquittopp-dev nlohmann-json3-dev libcurl4-openssl-dev \
-#   libssl-dev libyaml-cpp-dev libeigen3-dev
+# 用户信息
+ARG USERNAME=chunyu
+ARG USERPASSWORD=1
+ARG USER_UID=1000
+ARG USER_GID=1000
+ARG DEBIAN_FRONTEND=noninteractive
+RUN groupadd --gid ${USER_GID} ${USERNAME} && \
+    useradd --uid ${USER_UID} --gid ${USER_GID} -m ${USERNAME} && \
+    echo "$USERNAME:123" | chpasswd && \
+    echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME && \
+    chmod 0440 /etc/sudoers.d/$USERNAME && \
+    chown -R $USER_UID:$USER_GID /home/$USERNAME && \
+    chgrp -R $USERNAME /home/$USERNAME
 # ============================================================
