@@ -15,6 +15,8 @@ ENV ROS_DISTRO=humble
 # APT 镜像（22.04：sources.list 与 ubuntu.sources 并存）+ universe
 # 作为交叉编译镜像，仅保留构建链路必需依赖：
 #   - 工具链/构建工具（build-essential/cmake/pkg-config 等）
+#   - arm64 交叉编译工具链（aarch64-linux-gnu-gcc/g++ 等）
+#   - Qt host 构建工具（moc/uic/rcc，交叉编时需在 amd64 主机执行）
 #   - ros2 workspace 构建所需基础命令（git/sudo/python3-pip）
 #   - py_arm 当前编译依赖的 -dev 包（websocket/audio/json/mqtt/ssl/yaml/eigen 等）
 # 去除运行时/调试型依赖（如 X11/mesa/can-utils/iproute2/ping 等）。
@@ -45,6 +47,11 @@ RUN set -eux; \
       git \
       sudo \
       pkg-config \
+      binutils-aarch64-linux-gnu \
+      gcc-aarch64-linux-gnu \
+      g++-aarch64-linux-gnu \
+      libc6-dev-arm64-cross \
+      qtbase5-dev-tools \
       python3-pip \
       libsocketcan-dev \
       libwebsockets-dev \

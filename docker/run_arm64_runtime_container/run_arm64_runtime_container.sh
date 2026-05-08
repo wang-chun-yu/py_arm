@@ -8,10 +8,8 @@
 
 set -e
 
-docker login -u ubh -p ubtubt123 ybx.ubtrobot.com
+docker compose  -f ./docker/run_arm64_runtime_container/py_arm_arm64_runtime_docker-compose.yml pull
 
-docker compose  -f qilin_arm64_runtime_docker-compose.yml pull
+docker compose -f ./docker/run_arm64_runtime_container/py_arm_arm64_runtime_docker-compose.yml up -d
 
-docker compose -f qilin_arm64_runtime_docker-compose.yml up -d
-
-docker exec -it -u chunyu -w /home/chunyu/ qilin_arm64_runtime bash
+docker exec -it -u chunyu -w /home/chunyu/ py_arm_arm64_runtime bash

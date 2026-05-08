@@ -72,6 +72,80 @@ qilin_link_host_triplet_libdir() {
 }
 qilin_link_host_triplet_libdir
 
+# sysroot 的部分 CMake 包（如 Qt5）会导出 /usr/include/<triplet>/... 绝对路径。
+# 在 amd64 交叉机上该目录默认不存在，导致 find_package 阶段报路径缺失。
+# 将宿主机同名 include 目录指向 sysroot 下 triplet include 目录。
+qilin_link_host_triplet_includedir() {
+  [ "$TARGETPLATFORM" = "linux/arm64" ] || return 0
+  [ -n "${SYSROOT:-}" ] || return 0
+  local marker="/usr/include/${TARGET_TRIPLE}"
+  local real="${SYSROOT}/usr/include/${TARGET_TRIPLE}"
+  [ -d "$real" ] || return 0
+  if [ -L "$marker" ]; then
+    sudo ln -sfn "$real" "$marker"
+    return 0
+  fi
+  if [ -d "$marker" ]; then
+    # 若 marker 是真实目录，逐项回填软链接，避免覆盖已有宿主目录结构。
+    local p
+    while IFS= read -r -d '' p; do
+      sudo ln -sfn "$p" "${marker}/$(basename "$p")"
+    done < <(find "$real" -mindepth 1 -maxdepth 1 -print0)
+    return 0
+  fi
+  sudo mkdir -p "$(dirname "$marker")"
+  sudo ln -sfn "$real" "$marker"
+}
+qilin_link_host_triplet_includedir
+
+# sysroot 内 ROS/MoveIt 导出的部分库可能是 /opt/ros/humble/lib/<triplet>/lib*.so 绝对路径。
+# 交叉环境下容器内原生 /opt/ros/humble 为 amd64 版本，不含 aarch64 triplet 目录，需映射到 sysroot。
+qilin_link_host_ros_triplet_libdir() {
+  [ "$TARGETPLATFORM" = "linux/arm64" ] || return 0
+  [ -n "${SYSROOT:-}" ] || return 0
+  local marker="/opt/ros/humble/lib/${TARGET_TRIPLE}"
+  local real="${SYSROOT}/opt/ros/humble/lib/${TARGET_TRIPLE}"
+  [ -d "$real" ] || return 0
+  if [ -L "$marker" ]; then
+    sudo ln -sfn "$real" "$marker"
+    return 0
+  fi
+  if [ -d "$marker" ]; then
+    # 若 marker 已存在真实目录，逐项回填软链接，避免覆盖宿主目录。
+    local p
+    while IFS= read -r -d '' p; do
+      sudo ln -sfn "$p" "${marker}/$(basename "$p")"
+    done < <(find "$real" -mindepth 1 -maxdepth 1 -print0)
+    return 0
+  fi
+  sudo mkdir -p "$(dirname "$marker")"
+  sudo ln -sfn "$real" "$marker"
+}
+qilin_link_host_ros_triplet_libdir
+
+# sysroot 内 ROS 导出的 IMPORTED 库也可能直接指向 /opt/ros/humble/lib/*.so（非 triplet 子目录）。
+# 交叉环境下该路径默认是宿主 amd64 目录，不包含 arm64 目标库。
+# 仅将 sysroot 顶层 lib 中缺失的 .so/.so.* 回填到 /opt/ros/humble/lib，避免覆盖宿主已有文件。
+qilin_link_host_ros_toplibs() {
+  [ "$TARGETPLATFORM" = "linux/arm64" ] || return 0
+  [ -n "${SYSROOT:-}" ] || return 0
+  local marker="/opt/ros/humble/lib"
+  local real="${SYSROOT}/opt/ros/humble/lib"
+  [ -d "$real" ] || return 0
+  [ -d "$marker" ] || sudo mkdir -p "$marker"
+
+  local p name target
+  while IFS= read -r -d '' p; do
+    name="$(basename "$p")"
+    target="${marker}/${name}"
+    if [ -e "$target" ] || [ -L "$target" ]; then
+      continue
+    fi
+    sudo ln -s "$p" "$target"
+  done < <(find "$real" -mindepth 1 -maxdepth 1 \( -name '*.so' -o -name '*.so.*' \) -print0)
+}
+qilin_link_host_ros_toplibs
+
 # 交叉编 aarch64 时在 x86 上无法执行产物；gtest_discover_tests 会跑测试二进制，报
 # ld-linux-aarch64.so.1 / binfmt 相关错误。关闭测试构建（与 Walkerc_pro/build_arm.sh 一致）。
 colcon build \

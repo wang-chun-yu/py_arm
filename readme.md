@@ -17,7 +17,7 @@ note： 下面的脚本执行要求在py_arm的目录下
 ```
 ## 运行amd64仿真容器
 ```
-./docker/run_amd64_runtime_container/run_qilin_amd64_runtime_container.sh
+./docker/run_amd64_runtime_container/run_amd64_runtime_container.sh
 ```
 ## 运行amd64交叉编译容器
 ```

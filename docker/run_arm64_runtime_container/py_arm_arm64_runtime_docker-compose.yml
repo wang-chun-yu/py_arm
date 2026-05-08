@@ -1,7 +1,8 @@
 services:
-  qilin_arm64_runtime : &default
-    container_name: qilin_arm64_runtime
-    image: ybx.ubtrobot.com/runtime/py_arm/system:py_arm-ros2-humble-rk3588-v1.0.0
+  py_arm_arm64_runtime : &default
+    container_name: py_arm_arm64_runtime
+    image: localhost:5000/runtime/py_arm/system:py_arm-ros2-humble-v1.0.0
+    platform: linux/arm64
     network_mode: host
     tty: true
     restart: always
@@ -17,7 +18,7 @@ services:
       - /run/dbus:/run/dbus # for bluetooth
       - /var/run/dbus:/var/run/dbus:ro
       - /run/NetworkManager:/run/NetworkManager:ro
-      - ~/.config/ubx_docker:/home/chunyu/version_info:rw
+      - ~/.config/docker:/home/chunyu/version_info:rw
       - /usr/local/lib/camera-drv:/usr/local/lib/camera-drv:rw
     devices:
       - /dev/bus/usb
