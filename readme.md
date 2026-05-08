@@ -1,8 +1,23 @@
+# 项目说明
+
+
+
 # 项目结构
-- 智能体协作：git@github.com:wang-chun-yu/cursor-rules.git
-- 公共文档管理：git@github.com:wang-chun-yu/common-doc.git
-
-
+.cursor: 智能体协作(git@github.com:wang-chun-yu/cursor-rules.git)
+|
+common_doc: 公共文档管理(git@github.com:wang-chun-yu/common-doc.git)
+|
+doc: 项目文档
+|
+docker: 容器环境管理
+|
+script: 脚本
+|
+src: 代码文件
+    |
+    reference: 参考项目仓库
+    | 
+    system： 代码仓库 
 # 环境构建
 note： 下面的脚本执行要求在py_arm的目录下
 ## 运行本地仓库
